@@ -43,6 +43,12 @@ var imageSources = map[string]ImageSource{
 		WebPageName:  "nso-web.html",
 		WebPath:      "/nso-web",
 	},
+	"public_http": {
+		Name:         "Public HTTP Root",
+		ID:           "public_http",
+		Directory:    "/srv/http/",
+		StaticPrefix: "/public/",
+	},
 }
 
 // imageExtensions maps file extensions to their MIME types.
