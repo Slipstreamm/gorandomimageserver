@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>random needy streamer overload image :3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font and minor adjustments if needed */
+        body {
+            font-family: 'Inter', sans-serif; /* Inter is a common Tailwind font choice */
+        }
+        /* Ensure image does not exceed its container and maintains aspect ratio */
+        #randomImageView {
+            max-width: 100%;
+            max-height: 70vh; /* Max height to prevent overly large images from dominating the screen */
+            object-fit: contain; /* Scales the image while preserving its aspect ratio */
+            display: block; /* Removes extra space below the image */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .image-container {
+            min-height: 300px; /* Minimum height for the image container */
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="random needy streamer overload image web gui :3">
+    <meta property="og:description" content="Click the button to load a random image of Needy Streamer Overload! Served from a local Go-powered image server.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slipstreamm.dev/nso-web">
+    <meta property="og:site_name" content="random needy streamer overload image :3">
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl text-center">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-pink-400">random needy streamer overload image :3</h1>
+
+        <div class="mb-6 bg-gray-700 rounded-lg overflow-hidden image-container flex items-center justify-center">
+            <img id="randomImageView" 
+                 src="https://placehold.co/600x400/4A5568/E2E8F0?text=Click+Get+Random+Image" 
+                 alt="Randomly loaded image" 
+                 class="rounded-md shadow-lg">
+        </div>
+
+        <button id="getRandomImageBtn" 
+                class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75">
+            Get Random Image
+        </button>
+
+        <p id="statusMessage" class="mt-4 text-sm text-gray-400 h-5"></p>
+    </div>
+
+    <script>
+        // Get references to the DOM elements
+        const imageElement = document.getElementById('randomImageView');
+        const buttonElement = document.getElementById('getRandomImageBtn');
+        const statusMessageElement = document.getElementById('statusMessage');
+
+        // Configuration for the Go server
+        const serverBaseUrl = 'https://slipstreamm.dev'; // Your Go server's address
+        const randomImagePath = '/nso';             // The endpoint for random image redirect
+
+        // Placeholder image URL
+        const placeholderImageUrl = 'https://placehold.co/600x400/4A5568/E2E8F0?text=Click+Get+Random+Image';
+        const errorPlaceholderUrl = 'https://placehold.co/600x400/718096/E2E8F0?text=Error+Loading+Image';
+
+
+        // Function to fetch and display a random image
+        async function fetchRandomImage() {
+            statusMessageElement.textContent = 'Fetching image...';
+            buttonElement.disabled = true; // Disable button during fetch
+            buttonElement.classList.add('opacity-50', 'cursor-not-allowed');
+
+            try {
+                // Fetch from the /nso endpoint. Fetch API follows redirects by default.
+                // The response.url will be the final URL of the image after redirection.
+                const response = await fetch(serverBaseUrl + randomImagePath);
+
+                if (!response.ok) {
+                    // This might happen if the server returns an error before redirecting,
+                    // or if the redirect itself leads to an error.
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // The response.url is the URL of the actual image file after the redirect
+                const imageUrl = response.url; 
+                imageElement.src = imageUrl;
+                statusMessageElement.textContent = 'Image loaded!';
+
+            } catch (error) {
+                console.error('Error fetching random image:', error);
+                statusMessageElement.textContent = 'Failed to load image. Check console.';
+                imageElement.src = errorPlaceholderUrl; // Show an error placeholder
+                imageElement.alt = 'Error loading image. Please try again.';
+            } finally {
+                buttonElement.disabled = false; // Re-enable button
+                buttonElement.classList.remove('opacity-50', 'cursor-not-allowed');
+                // Clear status message after a delay
+                setTimeout(() => {
+                    if (statusMessageElement.textContent !== 'Failed to load image. Check console.') {
+                         statusMessageElement.textContent = '';
+                    }
+                }, 3000);
+            }
+        }
+
+        // Event listener for the button click
+        buttonElement.addEventListener('click', fetchRandomImage);
+
+        // Handle image loading errors directly on the img tag
+        imageElement.onerror = function() {
+            console.error('Error loading image resource:', imageElement.src);
+            statusMessageElement.textContent = 'Image resource could not be loaded.';
+            imageElement.src = errorPlaceholderUrl;
+            imageElement.alt = 'Failed to load image content.';
+        };
+
+        // Optional: Load an initial random image when the page loads
+        // window.addEventListener('DOMContentLoaded', fetchRandomImage);
+        // Commented out to allow user to click first.
+    </script>
+
+</body>
+</html>
