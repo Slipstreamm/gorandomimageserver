@@ -295,10 +295,13 @@ func main() {
 		}
 
 		// Check if the HTML file exists (optional, but good for startup feedback)
-		if _, err := os.Stat(source.WebPageName); os.IsNotExist(err) {
-			log.Printf("Warning: HTML file '%s' not found in the current directory. The %s endpoint might not work.", source.WebPageName, source.WebPath)
-		} else if err != nil {
-			log.Printf("Warning: Error checking for HTML file '%s': %v", source.WebPageName, err)
+		// Only check if WebPageName is not empty
+		if source.WebPageName != "" {
+			if _, err := os.Stat(source.WebPageName); os.IsNotExist(err) {
+				log.Printf("Warning: HTML file '%s' not found in the current directory. The %s endpoint might not work.", source.WebPageName, source.WebPath)
+			} else if err != nil {
+				log.Printf("Warning: Error checking for HTML file '%s': %v", source.WebPageName, err)
+			}
 		}
 	}
 
@@ -307,9 +310,15 @@ func main() {
 
 	// Register handlers for each image source
 	for _, source := range imageSources {
-		mux.HandleFunc(source.RandomPath, createRandomImageRedirectHandler(source))
-		mux.HandleFunc(source.StaticPrefix, createStaticFileHandler(source))
-		mux.HandleFunc(source.WebPath, createWebHandler(source))
+		if source.RandomPath != "" {
+			mux.HandleFunc(source.RandomPath, createRandomImageRedirectHandler(source))
+		}
+		if source.StaticPrefix != "" {
+			mux.HandleFunc(source.StaticPrefix, createStaticFileHandler(source))
+		}
+		if source.WebPath != "" {
+			mux.HandleFunc(source.WebPath, createWebHandler(source))
+		}
 	}
 
 	// Create a main index page that lists all available collections
@@ -326,9 +335,15 @@ func main() {
 
 		for _, source := range imageSources {
 			fmt.Fprintf(w, "<li><strong>%s</strong><ul>", source.Name)
-			fmt.Fprintf(w, "<li><a href=\"%s\">Random Image</a></li>", source.RandomPath)
-			fmt.Fprintf(w, "<li><a href=\"%s\">Image Index</a></li>", source.StaticPrefix)
-			fmt.Fprintf(w, "<li><a href=\"%s\">Web Viewer</a></li>", source.WebPath)
+			if source.RandomPath != "" {
+				fmt.Fprintf(w, "<li><a href=\"%s\">Random Image</a></li>", source.RandomPath)
+			}
+			if source.StaticPrefix != "" {
+				fmt.Fprintf(w, "<li><a href=\"%s\">Image Index</a></li>", source.StaticPrefix)
+			}
+			if source.WebPath != "" {
+				fmt.Fprintf(w, "<li><a href=\"%s\">Web Viewer</a></li>", source.WebPath)
+			}
 			fmt.Fprintln(w, "</ul></li>")
 		}
 
@@ -344,9 +359,15 @@ func main() {
 
 	for _, source := range imageSources {
 		log.Printf("  %s:", source.Name)
-		log.Printf("    Random: http://localhost:%s%s", port, source.RandomPath)
-		log.Printf("    Index:  http://localhost:%s%s", port, source.StaticPrefix)
-		log.Printf("    Web:    http://localhost:%s%s", port, source.WebPath)
+		if source.RandomPath != "" {
+			log.Printf("    Random: http://localhost:%s%s", port, source.RandomPath)
+		}
+		if source.StaticPrefix != "" {
+			log.Printf("    Index:  http://localhost:%s%s", port, source.StaticPrefix)
+		}
+		if source.WebPath != "" {
+			log.Printf("    Web:    http://localhost:%s%s", port, source.WebPath)
+		}
 	}
 
 	// Start the server with the CORS-enabled handler
